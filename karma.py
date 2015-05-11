@@ -119,7 +119,7 @@ def update_karma(db, who, method='+'):
 
 @commands('dm', 'demotivate')
 def increment_karma(bot, trigger):
-    nick = trigger.group(2)
+    nick = trigger.group(2).strip()
     if nick:
         bot.say('You\'re doing horrible work %s!' % nick)
         update_karma(bot.db, nick, '-')
