@@ -7,12 +7,7 @@ Copyright 2013, Timothy Lee <marlboromoo@gmail.com>
 Licensed under the MIT License.
 """
 
-import string
-import willie
-
-###############################################################################
-# Setup the module
-###############################################################################
+from willie.module import commands
 
 MODULE = 'karma'
 WHO = 'who'
@@ -46,6 +41,7 @@ def configure(config):
         config.interactive_add('karma', 'feedback', 'Notify by bot', 'True')
         config.interactive_add('karma', 'byself', 'Self (pro|de)mote', 'False')
 
+
 def setup(bot):
     """Setup the database, get the settings.
 
@@ -69,25 +65,6 @@ def setup(bot):
     feedback = feedback_
     byself = byself_
 
-    #. check database
-    if bot.db:
-        DB = bot.db
-    #     key, name = WHO, KARMA
-    #     columns = [key, KARMA, REASON]
-    #     if not getattr(bot.db, name):
-    #         try:
-    #             bot.db.add_table(name, columns, key)
-    #         except Exception, e:
-    #             debug(MODULE, 'Table init fail - %s' % (e), DEBUG_LEVEL)
-    #             raise e
-    # else:
-    #     msg = "DB init fail, setup the DB first!"
-    #     debug(MODULE, msg, DEBUG_LEVEL)
-    #     raise Exception(msg)
-
-###############################################################################
-# Helper function
-###############################################################################
 
 def is_true(value):
     """Return True if value is true
@@ -103,26 +80,32 @@ def is_true(value):
 
 
 def get_karma(db, who):
-    """Get karma status from the table.
+    """Get karma status from willie.db.get_nick_value.
 
+    :db: bot.db instance
     :who: nickname of IRC user
-    :returns: (karma, reason)
+    :returns: karma
 
     """
     return db.get_nick_value(who, KARMA_KEY)
 
 
 def set_karma(db, who, value):
+    """Set the karma via willie.db.set_nick_value.
+    :db: bot.db instance
+    :who: nickname of IRC user
+    :value: the new karma value
+
+    :returns: karma
+    """
     return db.set_nick_value(who, KARMA_KEY, value)
 
 
 def update_karma(db, who, method='+'):
     """Update karma for specify IRC user.
-
     :who: nickname of IRC user
     :reason: reason
     :method: '+' or '-'
-
     """
     karma = get_karma(db, who)
     karma = int(karma) if karma else 0
@@ -134,11 +117,7 @@ def update_karma(db, who, method='+'):
     set_karma(db, who, karma)
 
 
-###############################################################################
-# Event & Command
-###############################################################################
-
-@willie.module.commands('dm', 'demotivate')
+@commands('dm', 'demotivate')
 def increment_karma(bot, trigger):
     nick = trigger.group(2)
     if nick:
@@ -146,7 +125,7 @@ def increment_karma(bot, trigger):
         update_karma(bot.db, nick, '-')
 
 
-@willie.module.commands('m', 'motivate', 'thanks', 'thank')
+@commands('m', 'motivate', 'thanks', 'thank')
 def increment_karma(bot, trigger):
     nick = trigger.group(2)
     if nick:
@@ -154,7 +133,7 @@ def increment_karma(bot, trigger):
         update_karma(bot.db, nick, '+')
 
 
-@willie.module.commands('karma')
+@commands('karma')
 def karma(bot, trigger):
     """Command to show the karma status for specify IRC user.
     """
