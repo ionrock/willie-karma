@@ -117,9 +117,13 @@ def update_karma(db, who, method='+'):
     set_karma(db, who, karma)
 
 
+def get_nick(trigger):
+    return trigger.group(2).strip().split()[0]
+
+
 @commands('dm', 'demotivate')
-def increment_karma(bot, trigger):
-    nick = trigger.group(2).strip()
+def decrement_karma(bot, trigger):
+    nick = get_nick(trigger)
     if nick:
         bot.say('You\'re doing horrible work %s!' % nick)
         update_karma(bot.db, nick, '-')
@@ -127,7 +131,7 @@ def increment_karma(bot, trigger):
 
 @commands('m', 'motivate', 'thanks', 'thank')
 def increment_karma(bot, trigger):
-    nick = trigger.group(2)
+    nick = get_nick(trigger)
     if nick:
         bot.say('You\'re doing good work %s!' % nick)
         update_karma(bot.db, nick, '+')
@@ -138,8 +142,8 @@ def karma(bot, trigger):
     """Command to show the karma status for specify IRC user.
     """
     if trigger.group(2):
-        who = trigger.group(2).strip().split()[0]
-        karma = get_karma(bot.db, who)
-        bot.say("%s has %s karma" % (who, karma))
+        nick = get_nick(trigger)
+        karma = get_karma(bot.db, nick)
+        bot.say("%s has %s karma" % (nick, karma))
     else:
         bot.say(".karma <nick> - Reports karma status for <nick>.")
