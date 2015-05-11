@@ -134,83 +134,24 @@ def update_karma(db, who, method='+'):
     set_karma(db, who, karma)
 
 
-def _parse_msg(msg, method='+'):
-    """Parse the message.
-
-    :msg: message
-    :returns: (who, reason)
-
-    """
-    try:
-        who = msg.split(method)[0].strip().split().pop()
-
-        if len(reason) == 0:
-            reason = None
-        #. check if nickname only contain [a-Z_]
-        for s in who:
-            if s not in "%s_" % string.ascii_letters:
-                who = None
-                break
-    except Exception, e:
-        debug(MODULE, "parse message fail - %s." % (e), DEBUG_LEVEL)
-        return None, None
-    return who
-
-
-def parse_promote(msg):
-    """Parse the message with '++'.
-
-    :msg: message
-    :returns: who
-
-    """
-    return _parse_msg(msg, method='+')
-
-
-def parse_demote(msg):
-    """Parse the message with '--'.
-
-    :msg: message
-    :returns: who
-
-    """
-    return _parse_msg(msg, method='-')
-
-
-def meet_karma(db, trigger, parse_fun, inc_or_dec='+'):
-    """Update karma status for specify IRC user
-
-    :bot: willie.bot.Willie
-    :trigger: willie.bot.Willie.Trigger
-
-    """
-    msg = trigger.bytes
-    who = parse_fun(msg)
-    if who:
-        #. not allow self (pro|de)mote
-        if not byself:
-            if who == trigger.nick:
-                return
-        #. update karma
-        update_karma(db, who)
-
-
 ###############################################################################
 # Event & Command
 ###############################################################################
 
-@willie.module.rule(r'^[\w][\S]+[\+\+]')
-def meet_promote_karma(bot, trigger):
-    """Update karma status for specify IRC user if get '++' message.
-    """
-    return meet_karma(bot.db, trigger, parse_promote, inc_or_dec='+')
+@willie.module.commands('dm', 'demotivate')
+def increment_karma(bot, trigger):
+    nick = trigger.group(2)
+    if nick:
+        bot.say('You\'re doing horrible work %s!' % nick)
+        update_karma(bot.db, nick, '-')
 
 
-@willie.module.rule(r'^[\w][\S]+[\-\-]')
-def meet_demote_karma(bot, trigger):
-    """Update karma status for specify IRC user if get '--' message.
-    """
-    return meet_karma(bot.db, trigger, parse_demote, inc_or_dec='-')
+@willie.module.commands('m', 'motivate', 'thanks', 'thank')
+def increment_karma(bot, trigger):
+    nick = trigger.group(2)
+    if nick:
+        bot.say('You\'re doing good work %s!' % nick)
+        update_karma(bot.db, nick, '+')
 
 
 @willie.module.commands('karma')
