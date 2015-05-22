@@ -19,7 +19,6 @@ DEBUG_LEVEL = 'verbose'
 feedback = None
 byself = None
 
-DB = None
 
 def debug_(tag, text, level):
     """Mimic willie.debug function for pytest to use.
